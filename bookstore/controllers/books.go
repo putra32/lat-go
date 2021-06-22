@@ -56,3 +56,46 @@ func FindBook(c *gin.Context) {
 		"data": book,
 	})
 }
+
+// PATCH /books/:id
+// Updata a book
+func UpdateBook(c *gin.Context) {
+	// Get model if exist
+	var book models.Book
+	if err := configs.DB.Where("id = ?", c.Param("id")).First(&book).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Record not found!",
+		})
+		return
+	}
+
+	// Validate input
+	var input models.UpdateBookInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	configs.DB.Model(&book).Update(input)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": book,
+	})
+}
+
+// DELETE /books/:id
+// Delete a book
+func DeleteBook(c *gin.Context) {
+	// Get model if exist
+	var book models.Book
+	if err := configs.DB.Where("id = ? ", c.Param("id")).First(&book).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		return
+	}
+
+	configs.DB.Delete(&book)
+
+	c.JSON(http.StatusOK, gin.H{"data": true})
+}
